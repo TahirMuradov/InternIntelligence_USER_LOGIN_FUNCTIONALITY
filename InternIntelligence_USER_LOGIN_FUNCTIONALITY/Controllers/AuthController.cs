@@ -3,6 +3,7 @@ using Entites.DTOs;
 using InternIntelligence_USER_LOGIN_FUNCTIONALITY.Model.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InternIntelligence_USER_LOGIN_FUNCTIONALITY.Controllers
 {
@@ -13,26 +14,31 @@ namespace InternIntelligence_USER_LOGIN_FUNCTIONALITY.Controllers
     {
 
         private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
+        private readonly IHttpContextAccessor _contextAccessor;
+        public AuthController(IAuthService authService, IHttpContextAccessor contextAccessor)
         {
             _authService = authService;
-
+            _contextAccessor = contextAccessor;
         }
-     
-        
-       
+
+
+
         [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
+        
             var result = await _authService.LoginAsync(loginDTO);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
-        [HttpPut("[action]")]
         [Authorize]
-        public async Task<IActionResult> LogOut([FromQuery] Guid UserId)
-        {            
-            var result = await _authService.LogOutAsync(UserId.ToString());
+        [HttpPut("[action]")]
+        public async Task<IActionResult> LogOut()
+        {
+            string? currentUserId = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(currentUserId))
+                return Unauthorized();
+         
+            var result = await _authService.LogOutAsync(currentUserId);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 

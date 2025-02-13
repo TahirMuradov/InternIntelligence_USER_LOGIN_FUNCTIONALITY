@@ -1,5 +1,6 @@
 using Bussines.Abstract;
 using Bussines.Concrete;
+using Core.Helper;
 using FluentValidation.AspNetCore;
 using InternIntelligence_USER_LOGIN_FUNCTIONALITY.AppDBContext;
 using InternIntelligence_USER_LOGIN_FUNCTIONALITY.FluentValidations.AuthDTOs;
@@ -21,6 +22,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+ConfigurationHelper.Initialize(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDBContext>(options =>
 {

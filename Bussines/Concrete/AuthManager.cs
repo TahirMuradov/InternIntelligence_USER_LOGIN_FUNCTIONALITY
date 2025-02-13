@@ -190,6 +190,7 @@ namespace Bussines.Concrete
 
             };
 
+                string a = ConfigurationHelper.config.GetSection("Domain:Api").Get<string>();
             IdentityResult identityResult = await _userManager.CreateAsync(newUser, registerDTO.Password);
 
             if (identityResult.Succeeded)
