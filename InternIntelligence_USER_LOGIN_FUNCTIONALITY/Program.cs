@@ -12,12 +12,14 @@ using InternIntelligence_USER_LOGIN_FUNCTIONALITY.Security.Abstract;
 using InternIntelligence_USER_LOGIN_FUNCTIONALITY.Security.Concrete;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +45,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
     // Default Lockout settings.
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.MaxFailedAccessAttempts = 2;
     options.Lockout.AllowedForNewUsers = false;
     // Default Password settings.
     options.Password.RequireDigit = false;
@@ -120,6 +122,32 @@ builder.Services.AddControllers(options => options.Filters.Add<ValidationFilters
 
         configuration.ValidatorOptions.LanguageManager.Culture = new CultureInfo("en");
     });
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+           
+            builder.AllowAnyOrigin()
+                   .AllowAnyHeader() 
+                   .AllowAnyMethod(); 
+        });
+});
+
+builder.Services.AddRateLimiter(option =>
+{
+    option.AddFixedWindowLimiter("Fixed",_option =>
+    {
+        _option.Window = TimeSpan.FromSeconds(20);
+        _option.PermitLimit = 4;
+        _option.QueueLimit = 3;
+        _option.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+
+
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -129,6 +157,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRateLimiter();
+app.UseCors("AllowSpecificOrigin");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

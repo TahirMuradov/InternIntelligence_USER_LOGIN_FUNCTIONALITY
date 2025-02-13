@@ -219,7 +219,7 @@ namespace Bussines.Concrete
             if (string.IsNullOrEmpty(Email)) return new ErrorResult(HttpStatusCode.BadRequest);
             var user = await _userManager.FindByEmailAsync(Email);
             if (user is null)
-                return new ErrorResult(HttpStatusCode.NotFound);
+                return new ErrorResult(message:"User not found", HttpStatusCode.NotFound);
             string token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             var url = _configuration["Domain:Front"] + $"/auth/forgotpassword/confirmation/{HttpUtility.UrlEncode(Email)}/{HttpUtility.UrlEncode(token)}";
