@@ -63,7 +63,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(x =>
 {
-    x.SwaggerDoc("v1", new OpenApiInfo { Title = "KarlShoes", Version = "v1", Description = "Identity Service API swagger client." });
+    x.SwaggerDoc("v1", new OpenApiInfo { Title = "User_Login", Version = "v1", Description = "Identity Service API swagger client." });
     x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
